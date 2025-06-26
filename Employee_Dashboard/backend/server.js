@@ -6,13 +6,18 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
-
-import userRoutes from './routes/userRoutes.js';
+import usersRoutes from './routes/userRoutes.js';
 import employeeAuthRoutes from './routes/employeeAuth.js';
 import taskRoutes from './routes/taskRoutes.js';
 import leaveRoutes from './routes/leaveRoutes.js';
 import connectDB from './config/db.js';
 import authRoutes from './routes/authRoutes.js';
+import projectRoutes from './routes/projectRoutes.js';
+import emmployeeRoutes from "./routes/emmployeeRoutes.js";
+import clientRoutes from "./routes/clientRoutes.js";
+import taaskRoutes from "./routes/taaskRoutes.js";
+import usersRoutes from './routes/userRoutes.js';
+
 
 dotenv.config();
 const app = express();
@@ -27,7 +32,14 @@ app.use(express.json());
 
 // Static files
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
+// Enable CORS (before your routes)
+app.use(cors({
+  origin: 'http://localhost:3000', // Your React app's URL
+  credentials: true
+}));
 
+// Body parser middleware
+app.use(express.json());
 
 // Routes
 app.use('/api/auth', authRoutes);
@@ -36,6 +48,11 @@ app.use('/api/users', userRoutes);
 app.use('/api/employees', employeeAuthRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/leaves', leaveRoutes);
+app.use('/api/projects', projectRoutes);
+app.use("/api/emmployees", emmployeeRoutes);
+app.use("/api/clients", clientRoutes);
+app.use("/api/taasks", taaskRoutes);
+app.use('/api/user', usersRoutes);
 
 // Multer configuration
 const storage = multer.diskStorage({

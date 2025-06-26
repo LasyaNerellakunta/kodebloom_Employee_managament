@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TopHeader from "../acomponents/aTopHeader";
 import Sidebar from "../acomponents/aSidebar";
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 function EmployeeDashboard(){
   const [employees, setEmployees] = useState([]);
@@ -16,7 +17,7 @@ function EmployeeDashboard(){
   const [username, setUsername] = useState("");
   const [profilePic, setProfilePic] = useState("");
 
-  const navigate = useNavigate(); // For navigation
+  const navigate = useNavigate();
 
   useEffect(() => {
     const username = localStorage.getItem("username");
@@ -30,19 +31,15 @@ function EmployeeDashboard(){
     setUsername(username);
     setProfilePic(pic);
 
-    const storedEmployees = localStorage.getItem("employees");
-const employeeList = storedEmployees
-  ? JSON.parse(storedEmployees)
-  : [
-      // fallback mock data only if nothing in localStorage
-      { id: 1, name: 'John Doe', role: 'full stack', employmentType: 'Full-Time', status: 'Active', salaryRange: '$50-100k' },
-      { id: 2, name: 'Jane Smith', role: 'manager', employmentType: 'Full-Time', status: 'Active', salaryRange: '$100-150k' },
-      { id: 3, name: 'Mike Johnson', role: 'Intern', employmentType: 'Intern', status: 'Active', salaryRange: '$0-50k' },
-      { id: 4, name: 'Sarah Williams', role: 'full stack', employmentType: 'Full-Time', status: 'InActive', salaryRange: '$50-100k' },
-    ];
-    setEmployees(employeeList);
-    setFilteredEmployees(employeeList);
-
+    // Fetch employees from backend
+    axios.get("http://localhost:5000/api/emmployees")
+      .then(res => {
+        setEmployees(res.data);
+        setFilteredEmployees(res.data);
+      })
+      .catch(err => {
+        console.error("Failed to fetch employees", err);
+      });
   }, []);
 
   const toggleSidebar = () => {
@@ -94,11 +91,15 @@ const employeeList = storedEmployees
     handleFilterChange('status', status);
   };
 
-  const handleRemove = (employeeId) => {
+  const handleRemove = async (employeeId) => {
     if (window.confirm("Are you sure you want to remove this employee?")) {
-      const updatedList = employees.filter(emp => emp.id !== employeeId);
-      setEmployees(updatedList);
-      localStorage.setItem("employees", JSON.stringify(updatedList));
+      try {
+        await axios.delete(`http://localhost:5000/api/emmployees/${employeeId}`);
+        const updatedList = employees.filter(emp => emp._id !== employeeId);
+        setEmployees(updatedList);
+      } catch (err) {
+        console.error("Failed to delete employee", err);
+      }
     }
   };
 
@@ -119,19 +120,15 @@ const employeeList = storedEmployees
         />
 
         <div className="w-full max-w-5xl p-8">
-          <div className="space-y-6">
-            {/* Filter section */}
-            {/* ... [unchanged code for filter/search inputs] */}
+          <div className="space-y-6"></div>
+          <div className="flex justify-end mt-6">
+            <button
+              className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
+              onClick={() => navigate('/employee/add')}
+            >
+              + Add Employee
+            </button>
           </div>
-            {/* Add Employee Button */}
-       <div className="flex justify-end mt-6">
-         <button
-          className="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
-          onClick={() => navigate('/employee/add')}
-         >
-         + Add Employee
-        </button>
-        </div>
           <div className="mt-8">
             <div className="flex gap-4 mb-6">
               <button
@@ -151,7 +148,7 @@ const employeeList = storedEmployees
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredEmployees.length > 0 ? (
                 filteredEmployees.map(employee => (
-                  <div key={employee.id} className="bg-white rounded-lg shadow-md p-6">
+                  <div key={employee._id} className="bg-white rounded-lg shadow-md p-6">
                     <div className="mb-4">
                       <h3 className="text-xl font-semibold text-gray-800">{employee.name}</h3>
                       <p className="text-gray-600">{employee.role} • {employee.employmentType}</p>
@@ -160,25 +157,25 @@ const employeeList = storedEmployees
                     <div className="flex flex-wrap gap-2">
                       <button
                         className="px-3 py-1 bg-blue-500 text-white rounded hover:bg-blue-600"
-                        onClick={() => navigate(`/employee/view/${employee.id}`)}
+                        onClick={() => navigate(`/employee/view/${employee._id}`)}
                       >
                         View
                       </button>
                       <button
                         className="px-3 py-1 bg-gray-500 text-white rounded hover:bg-gray-600"
-                        onClick={() => navigate(`/employee/edit/${employee.id}`)}
+                        onClick={() => navigate(`/employee/edit/${employee._id}`)}
                       >
                         Edit
                       </button>
                       <button
                         className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
-                        onClick={() => handleRemove(employee.id)}
+                        onClick={() => handleRemove(employee._id)}
                       >
                         Remove
                       </button>
                       <button
                         className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600"
-                        onClick={() => navigate(`/employee/assign/${employee.id}`)}
+                        onClick={() => navigate(`/employee/assign/${employee._id}`)}
                       >
                         Assign Task
                       </button>

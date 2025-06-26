@@ -51,31 +51,22 @@ function ClientManagement() {
     if (!newClient.name || !newClient.email) return;
 
     try {
-      const token = localStorage.getItem("token");
       const res = await axios.post(API_URL, newClient, {
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }) // Include token if required
-        }
+        headers: { "Content-Type": "application/json" }
       });
 
-      setClients([...clients, res.data]);
-      setNewClient({
-        name: '',
-        email: '',
-        phone: '',
-        team: 'Sales Team'
-      });
+      setClients(prev => [...prev, res.data]);
+      setNewClient({ name: '', email: '', phone: '', team: 'Sales Team' });
     } catch (err) {
       console.error('Error adding client:', err);
-      alert('Failed to add client. See console for details.');
+      alert('Failed to add client.');
     }
   };
 
   const handleDeleteClient = async (id) => {
     try {
       await axios.delete(`${API_URL}/${id}`);
-      setClients(clients.filter(client => client._id !== id));
+      setClients(prev => prev.filter(client => client._id !== id));
     } catch (err) {
       console.error('Error deleting client:', err);
     }
@@ -86,7 +77,6 @@ function ClientManagement() {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} closeSidebar={closeSidebar} />
       <div className={`flex-1 transition-all duration-300 ${isSidebarOpen ? "ml-64" : "ml-0"}`}>
         <TopHeader pageTitle="Client Management" userName={username} profilePic={profilePic} toggleSidebar={toggleSidebar} />
-
         <div className="w-full max-w-5xl p-8">
           <div className="bg-white rounded-lg shadow-md p-6 mb-8">
             <h2 className="text-2xl font-semibold text-gray-800 mb-6">Add New Client</h2>
@@ -160,7 +150,6 @@ function ClientManagement() {
               </table>
             </div>
           </div>
-
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const AddEmployee = () => {
   const [employee, setEmployee] = useState({
@@ -17,12 +18,18 @@ const AddEmployee = () => {
     setEmployee({ ...employee, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('New employee:', employee);
-    // Here you’d normally POST to backend
-    alert("Employee added successfully!");
-    navigate('/employees');
+    try {
+      const res = await axios.post('http://localhost:5000/api/emmployees', employee);
+      if (res.status === 201) {
+        alert("Employee added successfully!");
+        navigate('/employees');
+      }
+    } catch (err) {
+      console.error("Error adding employee:", err);
+      alert("Failed to add employee. Try again.");
+    }
   };
 
   return (
