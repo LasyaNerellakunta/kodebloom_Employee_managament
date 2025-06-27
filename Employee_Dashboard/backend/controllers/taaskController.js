@@ -1,40 +1,50 @@
-import Taask from "../models/Taask.js";
+// backend/controllers/taaskController.js
+import Taask from '../models/Taask.js';
 
+// GET /api/taasks
 export const getTaasks = async (req, res) => {
   try {
-    const taasks = await Taask.find();
-    res.status(200).json(taasks);
-  } catch (error) {
-    res.status(500).json({ message: "Server error" });
+    const taasks = await Taask.find()
+      .populate('assignedTo', 'name role');
+    res.json(taasks);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
   }
 };
 
+// POST /api/taasks
 export const createTaask = async (req, res) => {
   try {
-    const newTaask = new Taask(req.body);
-    const savedTaask = await newTaask.save();
-    res.status(201).json(savedTaask);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    const { title, assignedTo, deadline, status, priority } = req.body;
+    const newTask = new Taask({ title, assignedTo, deadline, status, priority });
+    await newTask.save();
+    const populated = await newTask.populate('assignedTo', 'name role');
+    res.status(201).json(populated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };
 
+// PUT /api/taasks/:id
 export const updateTaask = async (req, res) => {
   try {
-    const updatedTaask = await Taask.findByIdAndUpdate(req.params.id, req.body, { new: true });
-    if (!updatedTaask) return res.status(404).json({ message: "Taask not found" });
-    res.status(200).json(updatedTaask);
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    const updated = await Taask.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    ).populate('assignedTo', 'name role');
+    res.json(updated);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };
 
+// DELETE /api/taasks/:id
 export const deleteTaask = async (req, res) => {
   try {
-    const deleted = await Taask.findByIdAndDelete(req.params.id);
-    if (!deleted) return res.status(404).json({ message: "Taask not found" });
-    res.status(200).json({ message: "Taask deleted" });
-  } catch (error) {
-    res.status(400).json({ message: error.message });
+    await Taask.findByIdAndDelete(req.params.id);
+    res.sendStatus(204);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
   }
 };

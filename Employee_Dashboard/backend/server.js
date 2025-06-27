@@ -6,6 +6,7 @@ import dotenv from 'dotenv';
 import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import userRoutes from './routes/userRoutes.js';
 import usersRoutes from './routes/userRoutes.js';
 import employeeAuthRoutes from './routes/employeeAuth.js';
 import taskRoutes from './routes/taskRoutes.js';
@@ -16,8 +17,6 @@ import projectRoutes from './routes/projectRoutes.js';
 import emmployeeRoutes from "./routes/emmployeeRoutes.js";
 import clientRoutes from "./routes/clientRoutes.js";
 import taaskRoutes from "./routes/taaskRoutes.js";
-import usersRoutes from './routes/userRoutes.js';
-
 
 dotenv.config();
 const app = express();
@@ -53,6 +52,8 @@ app.use("/api/emmployees", emmployeeRoutes);
 app.use("/api/clients", clientRoutes);
 app.use("/api/taasks", taaskRoutes);
 app.use('/api/user', usersRoutes);
+
+
 
 // Multer configuration
 const storage = multer.diskStorage({
